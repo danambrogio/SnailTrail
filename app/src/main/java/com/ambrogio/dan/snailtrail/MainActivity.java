@@ -1,5 +1,6 @@
 package com.ambrogio.dan.snailtrail;
 
+import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -19,6 +20,7 @@ import com.google.android.gms.maps.StreetViewPanoramaFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.StreetViewPanoramaLocation;
 
@@ -27,8 +29,11 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity
         implements OnStreetViewPanoramaReadyCallback, OnMapReadyCallback, StreetViewPanorama.OnStreetViewPanoramaChangeListener {
 
-    LatLng current;
-    ArrayList<LatLng> locations;
+    private LatLng current;
+    private ArrayList<LatLng> locations;
+    private final int[] colours = {Color.GREEN, Color.RED, Color.BLUE, Color.BLACK};
+    private int currentColour;
+    private Polyline trail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,17 +42,27 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        currentColour = 0;
+
         // Get current location
         try {
             LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             Criteria criteria = new Criteria();
             String provider = locationManager.getBestProvider(criteria, true);
-            Location location = locationManager.getLastKnownLocation(provider);
-            current = new LatLng(location.getLatitude(), location.getLongitude());
+            if (provider != null){
+                Location location = locationManager.getLastKnownLocation(provider);
+                current = new LatLng(location.getLatitude(), location.getLongitude());
+            }
+            else {
+                current = new LatLng(-33.87365, 151.20689);
+            }
             locations = new ArrayList<>();
             locations.add(current);
         }
         catch (SecurityException e){
+            current = new LatLng(-33.87365, 151.20689);
+        }
+        catch (Exception e){
             current = new LatLng(-33.87365, 151.20689);
         }
 
@@ -77,6 +92,8 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            currentColour = (currentColour + 1) % 3;
+            drawTrail();
             return true;
         }
 
@@ -104,13 +121,22 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onStreetViewPanoramaChange(StreetViewPanoramaLocation streetViewPanoramaLocation) {
         current = streetViewPanoramaLocation.position;
-        locations.add(current);
+        if (current != null) {
+            locations.add(current);
+        }
 
+        drawTrail();
+    }
+
+    public void drawTrail(){
         // Draw a line on the map
         if (locations.size() > 1) {
             MapFragment mapFragment = (MapFragment) getFragmentManager()
                     .findFragmentById(R.id.map);
-            mapFragment.getMap().addPolyline(new PolylineOptions().addAll(locations));
+            if (trail != null) {
+                trail.remove();
+            }
+            this.trail = mapFragment.getMap().addPolyline(new PolylineOptions().addAll(locations).color(colours[currentColour]));
         }
     }
 }
