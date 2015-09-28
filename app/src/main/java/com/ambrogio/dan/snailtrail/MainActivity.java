@@ -56,8 +56,6 @@ public class MainActivity extends AppCompatActivity
             else {
                 current = new LatLng(-33.87365, 151.20689);
             }
-            locations = new ArrayList<>();
-            locations.add(current);
         }
         catch (SecurityException e){
             current = new LatLng(-33.87365, 151.20689);
@@ -65,6 +63,8 @@ public class MainActivity extends AppCompatActivity
         catch (Exception e){
             current = new LatLng(-33.87365, 151.20689);
         }
+        locations = new ArrayList<>();
+        locations.add(current);
 
         StreetViewPanoramaFragment streetViewPanoramaFragment =
                 (StreetViewPanoramaFragment) getFragmentManager()
