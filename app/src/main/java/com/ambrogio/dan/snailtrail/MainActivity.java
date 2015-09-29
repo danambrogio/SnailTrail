@@ -17,6 +17,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.OnStreetViewPanoramaReadyCallback;
 import com.google.android.gms.maps.StreetViewPanorama;
 import com.google.android.gms.maps.StreetViewPanoramaFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity
         implements OnStreetViewPanoramaReadyCallback, OnMapReadyCallback, StreetViewPanorama.OnStreetViewPanoramaChangeListener {
 
+    private static final LatLng DEFAULT_LOCATION = new LatLng(-33.87365, 151.20689);
     private LatLng current;
     private ArrayList<LatLng> locations;
     private final int[] colours = {Color.GREEN, Color.RED, Color.BLUE, Color.BLACK};
@@ -54,14 +56,15 @@ public class MainActivity extends AppCompatActivity
                 current = new LatLng(location.getLatitude(), location.getLongitude());
             }
             else {
-                current = new LatLng(-33.87365, 151.20689);
+                current = DEFAULT_LOCATION;
             }
         }
         catch (SecurityException e){
-            current = new LatLng(-33.87365, 151.20689);
+            current = DEFAULT_LOCATION;
         }
         catch (Exception e){
-            current = new LatLng(-33.87365, 151.20689);
+            //TODO: Remove catching generic exceptions
+            current = DEFAULT_LOCATION;
         }
         locations = new ArrayList<>();
         locations.add(current);
@@ -108,14 +111,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onMapReady(GoogleMap map) {
-        map.addMarker(new MarkerOptions()
-                .position(current)
-                .title("Start"));
-        CameraPosition pos = new CameraPosition.Builder()
-                .target(current)
-                .zoom(15)
-                .build();
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(pos));
+        centerMap(map);
     }
 
     @Override
@@ -129,14 +125,32 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void drawTrail(){
+        MapFragment mapFragment = (MapFragment) getFragmentManager()
+                .findFragmentById(R.id.map);
+        GoogleMap map = mapFragment.getMap();
+
+        // Move the pin to the current location)
+        map.clear();
+        map.addMarker(new MarkerOptions()
+                .position(current)
+                .title("Snail")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.snail)));
+
         // Draw a line on the map
         if (locations.size() > 1) {
-            MapFragment mapFragment = (MapFragment) getFragmentManager()
-                    .findFragmentById(R.id.map);
             if (trail != null) {
                 trail.remove();
             }
-            this.trail = mapFragment.getMap().addPolyline(new PolylineOptions().addAll(locations).color(colours[currentColour]));
+            this.trail = map.addPolyline(new PolylineOptions().addAll(locations).color(colours[currentColour]));
         }
+        centerMap(map);
+    }
+
+    public void centerMap(GoogleMap map){
+        CameraPosition pos = new CameraPosition.Builder()
+                .target(current)
+                .zoom(15)
+                .build();
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(pos));
     }
 }
