@@ -28,7 +28,8 @@ import com.google.android.gms.maps.model.StreetViewPanoramaLocation;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
-        implements OnStreetViewPanoramaReadyCallback, OnMapReadyCallback, StreetViewPanorama.OnStreetViewPanoramaChangeListener {
+         {
+    // (!) Implement needed interfaces
 
     private static final LatLng DEFAULT_LOCATION = new LatLng(-33.87365, 151.20689);
     private LatLng current;
@@ -69,14 +70,7 @@ public class MainActivity extends AppCompatActivity
         locations = new ArrayList<>();
         locations.add(current);
 
-        StreetViewPanoramaFragment streetViewPanoramaFragment =
-                (StreetViewPanoramaFragment) getFragmentManager()
-                        .findFragmentById(R.id.panorama);
-        streetViewPanoramaFragment.getStreetViewPanoramaAsync(this);
-
-        MapFragment mapFragment = (MapFragment) getFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        // (!) Create fragments
     }
 
     @Override
@@ -103,26 +97,7 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onStreetViewPanoramaReady(StreetViewPanorama panorama) {
-        panorama.setPosition(current);
-        panorama.setOnStreetViewPanoramaChangeListener(this);
-    }
-
-    @Override
-    public void onMapReady(GoogleMap map) {
-        centerMap(map);
-    }
-
-    @Override
-    public void onStreetViewPanoramaChange(StreetViewPanoramaLocation streetViewPanoramaLocation) {
-        current = streetViewPanoramaLocation.position;
-        if (current != null) {
-            locations.add(current);
-        }
-
-        drawTrail();
-    }
+    // (!) Add Override methods
 
     public void drawTrail(){
         MapFragment mapFragment = (MapFragment) getFragmentManager()
