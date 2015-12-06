@@ -48,27 +48,33 @@ public class MainActivity extends AppCompatActivity
 
         // Get current location
         try {
+            /*
+            LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+            Criteria criteria = new Criteria();
+            String provider = locationManager.getBestProvider(criteria, true);
+            if (provider != null){
+                Location location = locationManager.getLastKnownLocation(provider);
+                current = new LatLng(location.getLatitude(), location.getLongitude());
 
-           // LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-           // Criteria criteria = new Criteria();
-            //String provider = locationManager.getBestProvider(criteria, true);
-            //if (provider != null){
-                //Location location = locationManager.getLastKnownLocation            Bundle extras = getIntent().getExtras();
-            double lat = 0;
-            double lng = 0;
-            Bundle extras = getIntent().getExtras();
-            if (extras != null) {
+           }*/
 
-                lat = extras.getDouble("lat");
-                lng = extras.getDouble("lng");
+
+                double lat  = getIntent().getDoubleExtra("lat", 0);
+                double lng = getIntent().getDoubleExtra("lng", 0);
+                current = new LatLng(lat,lng);
+            if(current != null)
+            {
+
+            }else{
+                current = DEFAULT_LOCATION;
             }
-                current = new LatLng(lat, lng);
-           // }ongitude());
-//         // }
-       //   //else {
-              //  current = DE//ULT_LOCATION;
-            //}
-        } catch (Exception e){
+
+
+        }
+        catch (SecurityException e){
+            current = DEFAULT_LOCATION;
+        }
+        catch (Exception e){
             //TODO: Remove catching generic exceptions
             current = DEFAULT_LOCATION;
         }
@@ -122,10 +128,11 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onStreetViewPanoramaChange(StreetViewPanoramaLocation streetViewPanoramaLocation) {
-        current = streetViewPanoramaLocation.position;
-        if (current != null) {
-            locations.add(current);
-        }
+
+            current = streetViewPanoramaLocation.position;
+            if (current != null) {
+                locations.add(current);
+            }
 
         drawTrail();
     }

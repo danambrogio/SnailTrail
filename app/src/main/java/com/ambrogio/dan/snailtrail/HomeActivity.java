@@ -40,19 +40,42 @@ public class HomeActivity extends AppCompatActivity {
         location2 = (Button) findViewById(R.id.location2Btn);
         location3 = (Button) findViewById(R.id.location3Btn);
         currentLocation = (Button) findViewById(R.id.currentLocationBtn);
-        location1.setOnClickListener(new View.OnClickListener() {
+        location3.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-               /* Intent intent = new Intent(getBaseContext(), MainActivity.class);
-                intent.putExtra("location", "100 City Centre Dr, Mississauga, ON L5B 2C9");
-                startActivity(intent);*/
+
                 Geocoder gc = new Geocoder(context);
 
 
                 try {
-                    List<Address> list = gc.getFromLocationName("L5B 2C9", 1);
+                    List<Address> list = gc.getFromLocationName("Spain, Madrid", 1);
                     Address address = list.get(0);
                     String locality = address.getLocality();
-                    Toast.makeText(context, locality, Toast.LENGTH_LONG).show();
+
+                    double lat = address.getLatitude();
+                    double lng = address.getLongitude();
+                    Toast.makeText(context, "Welcome to the Madrid, Spain level.", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(getBaseContext(), MainActivity.class);
+                    intent.putExtra("lat", lat);
+                    intent.putExtra("lng", lng);
+                    startActivity(intent);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+        });
+        location1.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                Geocoder gc = new Geocoder(context);
+
+
+                try {
+                    List<Address> list = gc.getFromLocationName("Ryerson University", 1);
+                    Address address = list.get(0);
+                    String locality = address.getLocality();
+                    Toast.makeText(context, "Welcome to the Ryerson University - Toronto level.", Toast.LENGTH_LONG).show();
                     double lat = address.getLatitude();
                     double lng = address.getLongitude();
                     Intent intent = new Intent(getBaseContext(), MainActivity.class);
@@ -68,49 +91,21 @@ public class HomeActivity extends AppCompatActivity {
         });
         location2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-               /* Intent intent = new Intent(getBaseContext(), MainActivity.class);
-                intent.putExtra("location", "100 City Centre Dr, Mississauga, ON L5B 2C9");
-                startActivity(intent);*/
+
                 Geocoder gc = new Geocoder(context);
 
 
                 try {
-                    List<Address> list = gc.getFromLocationName("M5B 2R8", 1);
+                    List<Address> list = gc.getFromLocationName("London, England", 1);
                     Address address = list.get(0);
                     String locality = address.getLocality();
-                    Toast.makeText(context, locality, Toast.LENGTH_LONG).show();
-                   /* double lat = address.getLatitude();
+                    Toast.makeText(context, "Welcome to the London, England level.", Toast.LENGTH_LONG).show();
+                    double lat = address.getLatitude();
                     double lng = address.getLongitude();
                     Intent intent = new Intent(getBaseContext(), MainActivity.class);
                     intent.putExtra("lat", lat);
                     intent.putExtra("lng", lng);
-                    startActivity(intent);*/
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-
-            }
-        });
-        location3.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-               /* Intent intent = new Intent(getBaseContext(), MainActivity.class);
-                intent.putExtra("location", "100 City Centre Dr, Mississauga, ON L5B 2C9");
-                startActivity(intent);*/
-                Geocoder gc = new Geocoder(context);
-
-
-                try {
-                    List<Address> list = gc.getFromLocationName("Eiffel Tower", 1);
-                    Address address = list.get(0);
-                    String locality = address.getLocality();
-                    Toast.makeText(context, locality, Toast.LENGTH_LONG).show();
-                    /*double lat = address.getLatitude();
-                    double lng = address.getLongitude();
-                    Intent intent = new Intent(getBaseContext(), MainActivity.class);
-                    intent.putExtra("lat", lat);
-                    intent.putExtra("lng", lng);
-                    startActivity(intent);*/
+                    startActivity(intent);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -120,29 +115,18 @@ public class HomeActivity extends AppCompatActivity {
         });
         currentLocation.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-               /* Intent intent = new Intent(getBaseContext(), MainActivity.class);
-                intent.putExtra("location", "100 City Centre Dr, Mississauga, ON L5B 2C9");
-                startActivity(intent);*/
+
                 Geocoder gc = new Geocoder(context);
                 double lat = 0;
                 double lng = 0;
 
 
-
+                try {
                     LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
                     Criteria criteria = new Criteria();
                     String provider = locationManager.getBestProvider(criteria, true);
                     if (provider != null) {
-                        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            // TODO: Consider calling
-                            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
-                            // here to request the missing permissions, and then overriding
-                            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                            //                                          int[] grantResults)
-                            // to handle the case where the user grants the permission. See the documentation
-                            // for Activity#requestPermissions for more details.
-                            return;
-                        }
+
                         Location location = locationManager.getLastKnownLocation(provider);
                         current = new LatLng(location.getLatitude(), location.getLongitude());
                         lat = current.latitude;
@@ -153,7 +137,9 @@ public class HomeActivity extends AppCompatActivity {
                     intent.putExtra("lat", lat);
                     intent.putExtra("lng", lng);
                     startActivity(intent);
+                }catch(Exception e){
 
+                }
 
 
             }
