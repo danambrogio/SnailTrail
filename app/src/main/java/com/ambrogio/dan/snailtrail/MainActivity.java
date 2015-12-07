@@ -1,14 +1,13 @@
 package com.ambrogio.dan.snailtrail;
 
 import android.graphics.Color;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -20,6 +19,7 @@ import com.google.android.gms.maps.StreetViewPanoramaFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -31,11 +31,13 @@ public class MainActivity extends AppCompatActivity
         implements OnStreetViewPanoramaReadyCallback, OnMapReadyCallback, StreetViewPanorama.OnStreetViewPanoramaChangeListener {
 
     private static final LatLng DEFAULT_LOCATION = new LatLng(-33.87365, 151.20689);
-    private LatLng current;
-    private ArrayList<LatLng> locations;
+    private LatLng current;                 //current location
+    private ArrayList<LatLng> locations;    //where the player has been
+    private ArrayList<LatLng> markers;      //markers on the map
     private final int[] colours = {Color.GREEN, Color.RED, Color.BLUE, Color.BLACK};
     private int currentColour;
     private Polyline trail;
+    private int score = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,32 +46,19 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        TextView scoreText = (TextView) findViewById(R.id.scoreText);
+        scoreText.setText(String.format(getString(R.string.score), score));
+
         currentColour = 0;
 
         // Get current location
         try {
-            /*
-            LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-            Criteria criteria = new Criteria();
-            String provider = locationManager.getBestProvider(criteria, true);
-            if (provider != null){
-                Location location = locationManager.getLastKnownLocation(provider);
-                current = new LatLng(location.getLatitude(), location.getLongitude());
-
-           }*/
-
-
-                double lat  = getIntent().getDoubleExtra("lat", 0);
-                double lng = getIntent().getDoubleExtra("lng", 0);
-                current = new LatLng(lat,lng);
-            if(current != null)
-            {
-
-            }else{
+            double lat = getIntent().getDoubleExtra("lat", -33.87365);
+            double lng = getIntent().getDoubleExtra("lng", 151.20689);
+            current = new LatLng(lat, lng);
+            if(current == null){
                 current = DEFAULT_LOCATION;
             }
-
-
         }
         catch (SecurityException e){
             current = DEFAULT_LOCATION;
@@ -80,6 +69,14 @@ public class MainActivity extends AppCompatActivity
         }
         locations = new ArrayList<>();
         locations.add(current);
+
+        markers = new ArrayList<>();
+        for (int i = 0; i < 3; i++){
+            double lat = getIntent().getDoubleExtra("marker" + i + "lat", 0);
+            double lng = getIntent().getDoubleExtra("marker" + i + "lng", 0);
+            LatLng marker = new LatLng(lat, lng);
+            markers.add(marker);
+        }
 
         StreetViewPanoramaFragment streetViewPanoramaFragment =
                 (StreetViewPanoramaFragment) getFragmentManager()
@@ -129,10 +126,25 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onStreetViewPanoramaChange(StreetViewPanoramaLocation streetViewPanoramaLocation) {
 
-            current = streetViewPanoramaLocation.position;
+        current = streetViewPanoramaLocation.position;
+        if (current != null) {
+            locations.add(current);
+        }
+
+        // Check if close to a coin
+        float[] distance = new float[1];
+        for (LatLng coin : markers) {
             if (current != null) {
-                locations.add(current);
+                Location.distanceBetween(current.latitude, current.longitude, coin.latitude, coin.longitude, distance);
+                if (distance[0] < 20) {
+                    markers.remove(coin);
+                    score++;
+                    TextView scoreText = (TextView) findViewById(R.id.scoreText);
+                    scoreText.setText(String.format(getString(R.string.score), score));
+                    break;
+                }
             }
+        }
 
         drawTrail();
     }
@@ -148,6 +160,7 @@ public class MainActivity extends AppCompatActivity
                 .position(current)
                 .title("Snail")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.snail)));
+        addMarkers(map);
 
         // Draw a line on the map
         if (locations.size() > 1) {
@@ -165,5 +178,11 @@ public class MainActivity extends AppCompatActivity
                 .zoom(15)
                 .build();
         map.animateCamera(CameraUpdateFactory.newCameraPosition(pos));
+    }
+
+    public void addMarkers(GoogleMap map){
+        for (LatLng loc : markers) {
+            Marker m = map.addMarker(new MarkerOptions().position(loc).title("1 Pt"));
+        }
     }
 }

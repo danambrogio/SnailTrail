@@ -9,8 +9,8 @@ import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,7 +45,6 @@ public class HomeActivity extends AppCompatActivity {
 
                 Geocoder gc = new Geocoder(context);
 
-
                 try {
                     List<Address> list = gc.getFromLocationName("Spain, Madrid", 1);
                     Address address = list.get(0);
@@ -57,6 +56,21 @@ public class HomeActivity extends AppCompatActivity {
                     Intent intent = new Intent(getBaseContext(), MainActivity.class);
                     intent.putExtra("lat", lat);
                     intent.putExtra("lng", lng);
+
+                    /* Set up markers */
+                    /*"Casa Museo Lope de Vega, Madrid, Spain",*/
+                    String[] markerLocations = {"Calle de Moratín, 7, 28014 Madrid, Spain",
+                            "Calle de las Infantas, 2-4, 28004 Madrid, Spain",
+                            "ME Madrid Reina Victoria, Madrid, Spain"};
+                    for (int i = 0; i < markerLocations.length; i++) {
+                        list = gc.getFromLocationName(markerLocations[i], 1);
+                        address = list.get(0);
+                        lat = address.getLatitude();
+                        lng = address.getLongitude();
+                        intent.putExtra("marker" + i + "lat", lat);
+                        intent.putExtra("marker" + i + "lng", lng);
+                    }
+
                     startActivity(intent);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -81,6 +95,20 @@ public class HomeActivity extends AppCompatActivity {
                     Intent intent = new Intent(getBaseContext(), MainActivity.class);
                     intent.putExtra("lat", lat);
                     intent.putExtra("lng", lng);
+
+                    /* Set up markers */
+                    String[] markerLocations = {"Jarvis Street Baptist Church, Toronto, ON",
+                            "505 Victoria St Ln, Toronto, ON M5B",
+                            "119 Mutual St, Toronto, ON M5B 2B2"};
+                    for (int i = 0; i < markerLocations.length; i++) {
+                        list = gc.getFromLocationName(markerLocations[i], 1);
+                        address = list.get(0);
+                        lat = address.getLatitude();
+                        lng = address.getLongitude();
+                        intent.putExtra("marker" + i + "lat", lat);
+                        intent.putExtra("marker" + i + "lng", lng);
+                    }
+
                     startActivity(intent);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -105,6 +133,21 @@ public class HomeActivity extends AppCompatActivity {
                     Intent intent = new Intent(getBaseContext(), MainActivity.class);
                     intent.putExtra("lat", lat);
                     intent.putExtra("lng", lng);
+
+                    /* Set up markers */
+                    String[] markerLocations = {"8 York Buildings, London WC2N 6JN, UK",
+                            "Theatre Royal Haymarket, London",
+                            "Garrick Theatre, Charing Cross Road, London, United Kingdom"};
+                    for (int i = 0; i < markerLocations.length; i++) {
+                        list = gc.getFromLocationName(markerLocations[i], 1);
+                        address = list.get(0);
+                        lat = address.getLatitude();
+                        lng = address.getLongitude();
+                        intent.putExtra("marker" + i + "lat", lat);
+                        intent.putExtra("marker" + i + "lng", lng);
+                    }
+
+
                     startActivity(intent);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -127,6 +170,16 @@ public class HomeActivity extends AppCompatActivity {
                     String provider = locationManager.getBestProvider(criteria, true);
                     if (provider != null) {
 
+                        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            // TODO: Consider calling
+                            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
+                            // here to request the missing permissions, and then overriding
+                            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                            //                                          int[] grantResults)
+                            // to handle the case where the user grants the permission. See the documentation
+                            // for Activity#requestPermissions for more details.
+                            return;
+                        }
                         Location location = locationManager.getLastKnownLocation(provider);
                         current = new LatLng(location.getLatitude(), location.getLongitude());
                         lat = current.latitude;
@@ -140,8 +193,6 @@ public class HomeActivity extends AppCompatActivity {
                 }catch(Exception e){
 
                 }
-
-
             }
         });
 
