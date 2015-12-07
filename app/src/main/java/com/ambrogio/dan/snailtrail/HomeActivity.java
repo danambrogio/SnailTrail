@@ -20,7 +20,9 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -30,6 +32,8 @@ public class HomeActivity extends AppCompatActivity {
     Button currentLocation;
     Context context;
     LatLng current;
+
+    final static int NUM_MARKERS = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +75,8 @@ public class HomeActivity extends AppCompatActivity {
                         intent.putExtra("marker" + i + "lng", lng);
                     }
 
+                    intent.putExtra("premade", true);
+
                     startActivity(intent);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -108,6 +114,8 @@ public class HomeActivity extends AppCompatActivity {
                         intent.putExtra("marker" + i + "lat", lat);
                         intent.putExtra("marker" + i + "lng", lng);
                     }
+
+                    intent.putExtra("premade", true);
 
                     startActivity(intent);
                 } catch (IOException e) {
@@ -147,13 +155,12 @@ public class HomeActivity extends AppCompatActivity {
                         intent.putExtra("marker" + i + "lng", lng);
                     }
 
+                    intent.putExtra("premade", true);
 
                     startActivity(intent);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-
             }
         });
         currentLocation.setOnClickListener(new View.OnClickListener() {
@@ -162,7 +169,6 @@ public class HomeActivity extends AppCompatActivity {
                 Geocoder gc = new Geocoder(context);
                 double lat = 0;
                 double lng = 0;
-
 
                 try {
                     LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -189,14 +195,40 @@ public class HomeActivity extends AppCompatActivity {
                     Intent intent = new Intent(getBaseContext(), MainActivity.class);
                     intent.putExtra("lat", lat);
                     intent.putExtra("lng", lng);
+
+                    /* Set up markers */
+                    // We need to get 3 points near their location that are valid addresses
+                    // step 1: create an arraylist of LatLng's
+                    ArrayList<LatLng> markers = new ArrayList<>();
+
+                    // step 2: while size < 3, generate a random LatLng near current and check if valid
+                    // 5m = 0.0000449 lat/lng
+                    // should be in range of +- 200m
+                    // 40 * 0.0000449
+                    final double RANGE = 40 * 0.0000449;
+                    Random r = new Random();
+                    while (markers.size() < NUM_MARKERS){
+                        double latitude = current.latitude + ((-RANGE) + (RANGE - (-RANGE)) * r.nextDouble());
+                        double longitude = current.longitude + ((-RANGE) + (RANGE - (-RANGE)) * r.nextDouble());
+                        List<Address> loc = gc.getFromLocation(latitude, longitude, 1);
+                        if (loc != null && !loc.isEmpty()){
+                            markers.add(new LatLng(latitude, longitude));
+                        }
+                    }
+
+                    for (int i = 0; i < NUM_MARKERS; i++) {
+                        intent.putExtra("marker" + i + "lat", markers.get(i).latitude);
+                        intent.putExtra("marker" + i + "lng", markers.get(i).longitude);
+                    }
+
+                    intent.putExtra("premade", false);
+
                     startActivity(intent);
                 }catch(Exception e){
 
                 }
             }
         });
-
-
     }
 
     @Override

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SnailTrail</string>
     <string name="action_settings">Next Colour</string>
-    <string name="title_activity_home">HomeActivity</string>
+    <string name="title_activity_home">SnailTrail</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="score">%d / 3</string>

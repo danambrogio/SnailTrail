@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity
     private int currentColour;
     private Polyline trail;
     private int score = 0;
+    private int PICKUP_DISTANCE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +51,10 @@ public class MainActivity extends AppCompatActivity
         scoreText.setText(String.format(getString(R.string.score), score));
 
         currentColour = 0;
+
+        // Current location or premade?
+        boolean isPremade = getIntent().getBooleanExtra("premade", false);
+        PICKUP_DISTANCE = isPremade ? 20 : 50;
 
         // Get current location
         try {
@@ -136,7 +141,7 @@ public class MainActivity extends AppCompatActivity
         for (LatLng coin : markers) {
             if (current != null) {
                 Location.distanceBetween(current.latitude, current.longitude, coin.latitude, coin.longitude, distance);
-                if (distance[0] < 20) {
+                if (distance[0] < PICKUP_DISTANCE) {
                     markers.remove(coin);
                     score++;
                     TextView scoreText = (TextView) findViewById(R.id.scoreText);
