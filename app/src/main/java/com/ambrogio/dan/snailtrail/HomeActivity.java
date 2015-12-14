@@ -3,14 +3,13 @@ package com.ambrogio.dan.snailtrail;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Address;
-import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,7 +31,10 @@ public class HomeActivity extends AppCompatActivity {
     Button currentLocation;
     Context context;
     LatLng current;
-
+    final static int LOCATION_PERMISSIONS = 9001;
+    private static final String[] LOCATION_PERMS = {
+            Manifest.permission.ACCESS_FINE_LOCATION
+    };
     final static int NUM_MARKERS = 3;
 
     @Override
@@ -40,6 +42,9 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         context = this;
+
+        requestPermissions(LOCATION_PERMS, LOCATION_PERMISSIONS);
+
         location1 = (Button) findViewById(R.id.location1Btn);
         location2 = (Button) findViewById(R.id.location2Btn);
         location3 = (Button) findViewById(R.id.location3Btn);
@@ -172,25 +177,10 @@ public class HomeActivity extends AppCompatActivity {
 
                 try {
                     LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-                    Criteria criteria = new Criteria();
-                    String provider = locationManager.getBestProvider(criteria, true);
-                    if (provider != null) {
-
-                        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            // TODO: Consider calling
-                            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
-                            // here to request the missing permissions, and then overriding
-                            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                            //                                          int[] grantResults)
-                            // to handle the case where the user grants the permission. See the documentation
-                            // for Activity#requestPermissions for more details.
-                            return;
-                        }
-                        Location location = locationManager.getLastKnownLocation(provider);
-                        current = new LatLng(location.getLatitude(), location.getLongitude());
-                        lat = current.latitude;
-                        lng = current.longitude;
-                    }
+                    Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                    current = new LatLng(location.getLatitude(), location.getLongitude());
+                    lat = current.latitude;
+                    lng = current.longitude;
 
                     Intent intent = new Intent(getBaseContext(), MainActivity.class);
                     intent.putExtra("lat", lat);
@@ -224,7 +214,9 @@ public class HomeActivity extends AppCompatActivity {
                     intent.putExtra("premade", false);
 
                     startActivity(intent);
-                }catch(Exception e){
+                }catch (SecurityException e){
+                    Log.d("asdf", e.getMessage());
+                }catch (IOException e){
 
                 }
             }
